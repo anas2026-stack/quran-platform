@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مقرأة النخبة الاحترافية</title>
+    
+    <!-- استدعاء 20 خط احترافي -->
+    <link href="https://fonts.googleapis.com/css2?family=Almarai:wght@400;700&family=Amiri:wght@400;700&family=Aref+Ruqaa:wght@400;700&family=Cairo:wght@400;600;700&family=Changa:wght@400;600&family=El+Messiri:wght@400;600&family=Harmattan:wght@400;700&family=IBM+Plex+Sans+Arabic:wght@400;600&family=Katibeh&family=Kufam:wght@400;600&family=Lalezar&family=Lateef:wght@400;700&family=Mada:wght@400;600&family=Markazi+Text:wght@400;600&family=Montserrat:wght@400;600&family=Noto+Kufi+Arabic:wght@400;600&family=Noto+Naskh+Arabic:wght@400;600&family=Readex+Pro:wght@400;600&family=Reem+Kufi:wght@400;600&family=Scheherazade+New:wght@400;600&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --font-size: 55px;
+            --font-family: 'Tajawal', sans-serif; /* خط إملائي افتراضي فائق الوضوح */
+            --font-weight: 500;
+            --bg-color: #ffffff; /* واجهة بيضاء نقية (Clean UI) */
+            --text-color: #111827; /* أسود حاد جداً لتباين مريح */
+            --highlight-bg: #fef08a; /* أصفر احترافي قياسي للتعليم (Highlighter) */
+        }
+
+        body {
+            margin: 0; padding: 0;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'IBM Plex Sans Arabic', sans-serif;
+            overflow-x: hidden;
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        /* شريط التحكم العلوي النظيف */
+        .top-toolbar {
+            position: fixed; top: 0; left: 0; width: 100%;
+            background: #ffffff;
+            border-bottom: 1px solid #e5e7eb;
+            padding: 12px 24px; box-sizing: border-box;
+            display: flex; justify-content: center; gap: 15px; align-items: center;
+            z-index: 1000;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease;
+        }
+        .top-toolbar.hidden { transform: translateY(-100%); }
+
+        .settings-toggle {
+            position: fixed; top: 15px; right: 20px;
+            width: 40px; height: 40px; border-radius: 8px;
+            background: #f3f4f6; border: 1px solid #e5e7eb;
+            cursor: pointer; z-index: 999;
+            display: flex; justify-content: center; align-items: center;
+            font-size: 20px; color: #374151; transition: 0.2s;
+        }
+        .settings-toggle:hover { background: #e5e7eb; }
+
+        .btn {
+            background: #f9fafb; border: 1px solid #d1d5db; padding: 8px 16px;
+            border-radius: 6px; cursor: pointer; font-family: inherit;
+            font-weight: 600; font-size: 14px; color: #374151; transition: 0.2s;
+        }
+        .btn:hover { background: #f3f4f6; border-color: #9ca3af; }
+
+        select {
+            padding: 8px 12px; border-radius: 6px; border: 1px solid #d1d5db;
+            font-family: inherit; font-weight: 600; outline: none; background: #f9fafb;
+            cursor: pointer; font-size: 14px;
+        }
+
+        /* منطقة القراءة (نظيفة، حادة، مركزة) */
+        .quran-container {
+            width: 100%; max-width: 1400px; margin: 0 auto;
+            padding: 120px 40px 150px 40px; box-sizing: border-box;
+            text-align: center;
+        }
+
+        /* تراتبية بصرية صارمة */
+        .surah-title {
+            font-family: 'Reem Kufi', sans-serif; 
+            font-size: 4em; /* تكبير هائل لاسم السورة */
+            color: #111827;
+            margin-bottom: 10px; font-weight: 700;
+        }
+        
+        .basmalah {
+            font-family: 'Amiri', serif; 
+            font-size: 3em; /* تكبير البسملة */
+            color: #4b5563;
+            margin-bottom: 60px;
+        }
+
+        /* النص الأساسي الحاد */
+        .quran-text {
+            font-family: var(--font-family); 
+            font-size: var(--font-size);
+            font-weight: var(--font-weight); 
+            line-height: 2.3; 
+            direction: rtl;
+        }
+
+        /* 
+           التتبع السلس والناعم (Butter-Smooth Transition)
+           بدون تبهيت للنص المحيط وبدون قفزات
+        */
+        .word {
+            display: inline-block; 
+            margin: 0 4px; padding: 4px 10px; 
+            border-radius: 8px;
+            transform-origin: center;
+            transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .word.highlight {
+            background-color: var(--highlight-bg);
+            transform: scale(1.08); /* بروز الكلمة بثبات */
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1); /* ظل خفيف لإعطاء عمق للكلمة */
+            color: #000;
+            z-index: 10;
+            position: relative;
+        }
+
+        /* 
+           نظام تنبيه الأخطاء القياسي (Red Pulse Animation)
+        */
+        @keyframes pulse-red {
+            0% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.7); }
+            70% { box-shadow: 0 0 0 15px rgba(220, 38, 38, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0); }
+        }
+
+        .word.mistake {
+            background-color: #fee2e2 !important; /* خلفية حمراء باهتة قليلاً */
+            outline: 3px solid #dc2626 !important; /* إطار أحمر صلب لا يقبل اللبس */
+            color: #991b1b !important;
+            animation: pulse-red 1.5s infinite !important; /* الوميض الاحترافي */
+            transform: scale(1.08);
+        }
+
+        /* الفهرس الجانبي المنظم */
+        .sidebar {
+            position: fixed; top: 0; right: -400px; width: 350px; height: 100%;
+            background: #ffffff; border-left: 1px solid #e5e7eb;
+            box-shadow: -4px 0 15px rgba(0,0,0,0.05);
+            transition: right 0.3s ease-in-out; z-index: 1001; padding: 30px; 
+            overflow-y: auto; box-sizing: border-box;
+        }
+        .sidebar.open { right: 0; }
+        
+        .juz-header {
+            background: #f3f4f6; border: 1px solid #e5e7eb; padding: 14px; margin-top: 10px;
+            border-radius: 8px; font-weight: 700; cursor: pointer;
+            display: flex; justify-content: space-between; color: #111827;
+        }
+        .juz-header:hover { background: #e5e7eb; }
+        .juz-content { display: none; padding: 10px 0; }
+        .juz-content.active { display: block; }
+
+        .surah-item {
+            padding: 12px; margin-bottom: 4px; background: transparent;
+            border-radius: 6px; cursor: pointer;
+            font-weight: 600; font-size: 16px; color: #4b5563; transition: 0.2s;
+        }
+        .surah-item:hover { background: #f3f4f6; color: #111827; padding-right: 20px; }
+
+        .overlay { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.2); z-index: 1000; }
+        .overlay.active { display: block; }
+    </style>
+</head>
+<body>
+
+    <button class="settings-toggle" onclick="toggleToolbar()">⚙️</button>
+
+    <!-- شريط التحكم الاحترافي -->
+    <div class="top-toolbar" id="toolbar">
+        <button class="btn" onclick="toggleSidebar()">☰ الفهرس والأجزاء</button>
+        
+        <!-- قائمة الـ 20 خطاً -->
+        <select id="fontSelector" onchange="updateStyles()">
+            <option value="'Tajawal', sans-serif">Tajawal (ممتاز للإملائي)</option>
+            <option value="'IBM Plex Sans Arabic', sans-serif">IBM Plex Sans</option>
+            <option value="'Cairo', sans-serif">Cairo</option>
+            <option value="'Almarai', sans-serif">Almarai</option>
+            <option value="'Amiri', serif">Amiri</option>
+            <option value="'Noto Naskh Arabic', serif">Noto Naskh</option>
+            <option value="'Scheherazade New', serif">Scheherazade New</option>
+            <option value="'Changa', sans-serif">Changa</option>
+            <option value="'El Messiri', sans-serif">El Messiri</option>
+            <option value="'Harmattan', sans-serif">Harmattan</option>
+            <option value="'Katibeh', serif">Katibeh</option>
+            <option value="'Kufam', sans-serif">Kufam</option>
+            <option value="'Lalezar', display">Lalezar</option>
+            <option value="'Lateef', serif">Lateef</option>
+            <option value="'Mada', sans-serif">Mada</option>
+            <option value="'Markazi Text', serif">Markazi Text</option>
+            <option value="'Montserrat', sans-serif">Montserrat</option>
+            <option value="'Noto Kufi Arabic', sans-serif">Noto Kufi</option>
+            <option value="'Readex Pro', sans-serif">Readex Pro</option>
+            <option value="'Reem Kufi', sans-serif">Reem Kufi</option>
+            <option value="'Aref Ruqaa', serif">Aref Ruqaa</option>
+        </select>
+
+        <select id="fontWeightSelector" onchange="updateStyles()">
+            <option value="400">سماكة: عادي</option>
+            <option value="500" selected>سماكة: متوسط</option>
+            <option value="600">سماكة: شبه غامق</option>
+            <option value="700">سماكة: غامق</option>
+        </select>
+        
+        <button class="btn" onclick="changeFontSize(5)">تكبير النص +</button>
+        <button class="btn" onclick="changeFontSize(-5)">تصغير النص -</button>
+        <button class="btn" onclick="toggleToolbar()" style="color:#dc2626;">إغلاق ✕</button>
+    </div>
+
+    <!-- الفهرس -->
+    <div class="sidebar" id="sidebar">
+        <h2 style="margin-top:0;">القرآن الكريم</h2>
+        <div id="juzContainer"></div>
+    </div>
+    <div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+
+    <!-- مساحة القراءة -->
+    <div class="quran-container">
+        <div class="surah-title" id="displayTitle"></div>
+        <div class="basmalah" id="displayBasmalah">بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ</div>
+        <div class="quran-text" id="displayText"></div>
+    </div>
+
+    <script>
+        /* 
+        ========================================================================
+        منطقة الإدخال المباشر والمنظم للقرآن الكريم (الرسم الإملائي)
+        ========================================================================
+        هنا تضع القرآن كاملاً. انسخ والصق السور بنفس هذا النمط.
+        تأكد من وضع فاصلة (,) بين كل سورة وأخرى.
+        */
+        const myQuranDatabase = [
+            { 
+                juz: 30, 
+                title: "سورة النبأ", 
+                text: "عم يتساءلون (1) عن النبأ العظيم (2) الذي هم فيه مختلفون (3) كلا سيعلمون (4) ثم كلا سيعلمون (5) ألم نجعل الأرض مهادا (6)" 
+            },
+            { 
+                juz: 30, 
+                title: "سورة النازعات", 
+                text: "والنازعات غرقا (1) والناشطات نشطا (2) والسابحات سبحا (3) فالسابقات سبقا (4) فالمدبرات أمرا (5)" 
+            },
+            { 
+                juz: 29, 
+                title: "سورة الملك", 
+                text: "تبارك الذي بيده الملك وهو على كل شيء قدير (1) الذي خلق الموت والحياة ليبلوكم أيكم أحسن عملا وهو العزيز الغفور (2)" 
+            }
+            // يمكنك الاستمرار في لصق السور الـ 114 هنا بكل سهولة...
+        ];
+        /* ======================================================================== */
+
+        let currentWordIndex = -1;
+        let activeWords = [];
+
+        function toggleToolbar() { document.getElementById('toolbar').classList.toggle('hidden'); }
+        function closeSidebar() { document.getElementById('sidebar').classList.remove('open'); document.getElementById('overlay').classList.remove('active'); }
+        function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); document.getElementById('overlay').classList.toggle('active'); document.getElementById('toolbar').classList.add('hidden'); }
+
+        function updateStyles() { 
+            document.documentElement.style.setProperty('--font-family', document.getElementById('fontSelector').value); 
+            document.documentElement.style.setProperty('--font-weight', document.getElementById('fontWeightSelector').value);
+        }
+
+        let currentFontSize = 55;
+        function changeFontSize(change) {
+            currentFontSize += change;
+            if(currentFontSize < 30) currentFontSize = 30; if(currentFontSize > 120) currentFontSize = 120;
+            document.documentElement.style.setProperty('--font-size', currentFontSize + 'px');
+        }
+
+        function renderIndex() {
+            const container = document.getElementById('juzContainer');
+            container.innerHTML = '';
+            
+            let grouped = {};
+            myQuranDatabase.forEach((surah, index) => {
+                if(!grouped[surah.juz]) grouped[surah.juz] = [];
+                grouped[surah.juz].push({ ...surah, originalIndex: index });
+            });
+
+            let sortedJuz = Object.keys(grouped).sort((a,b) => a - b);
+
+            sortedJuz.forEach(juzNum => {
+                let juzDiv = document.createElement('div');
+                juzDiv.innerHTML = `<div class="juz-header" onclick="toggleJuz(${juzNum})">الجزء ${juzNum} <span>▼</span></div>
+                                    <div class="juz-content" id="juz-${juzNum}"></div>`;
+                container.appendChild(juzDiv);
+
+                let contentDiv = juzDiv.querySelector('.juz-content');
+                grouped[juzNum].forEach(surah => {
+                    let item = document.createElement('div');
+                    item.className = 'surah-item';
+                    item.innerHTML = `<span onclick="loadSurah(${surah.originalIndex})">${surah.title}</span>`;
+                    contentDiv.appendChild(item);
+                });
+            });
+        }
+
+        function toggleJuz(juzNum) { document.getElementById(`juz-${juzNum}`).classList.toggle('active'); }
+
+        function loadSurah(index) {
+            const surah = myQuranDatabase[index];
+            if(!surah) return;
+            
+            document.getElementById('displayTitle').innerText = surah.title;
+            // إخفاء البسملة لسورة التوبة
+            document.getElementById('displayBasmalah').style.display = (surah.title.includes('التوبة')) ? 'none' : 'block';
+            
+            const textContainer = document.getElementById('displayText');
+            textContainer.innerHTML = ''; 
+            
+            // إزالة البسملة إذا كانت مدمجة في النص لتجنب التكرار
+            let cleanText = surah.text.replace(/بسم الله الرحمن الرحيم/g, '').trim();
+            let words = cleanText.split(/\s+/);
+            activeWords = []; currentWordIndex = -1;
+
+            words.forEach(word => {
+                if(word.trim() === '') return;
+                let span = document.createElement('span');
+                span.className = 'word'; span.innerText = word;
+                textContainer.appendChild(span);
+                activeWords.push(span);
+            });
+            closeSidebar();
+        }
+
+        // محرك التتبع ومعالجة الأخطاء القياسي
+        document.addEventListener('keydown', function(event) {
+            if(["ArrowUp","ArrowDown","ArrowLeft","ArrowRight"].includes(event.code)) event.preventDefault();
+            if (activeWords.length === 0) return;
+
+            if (event.key === 'ArrowLeft') { 
+                if (currentWordIndex < activeWords.length - 1) {
+                    if (currentWordIndex >= 0) activeWords[currentWordIndex].classList.remove('highlight', 'mistake');
+                    currentWordIndex++;
+                    activeWords[currentWordIndex].classList.add('highlight');
+                    activeWords[currentWordIndex].scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            } 
+            else if (event.key === 'ArrowRight') { 
+                if (currentWordIndex > 0) {
+                    activeWords[currentWordIndex].classList.remove('highlight', 'mistake');
+                    currentWordIndex--;
+                    activeWords[currentWordIndex].classList.add('highlight');
+                    activeWords[currentWordIndex].scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }
+            // التنبيه الصارم للخطأ (وميض أحمر)
+            else if (event.key === 'ArrowDown') { 
+                if(currentWordIndex >= 0) activeWords[currentWordIndex].classList.add('mistake');
+            }
+            // إلغاء الخطأ
+            else if (event.key === 'ArrowUp') { 
+                if(currentWordIndex >= 0) activeWords[currentWordIndex].classList.remove('mistake');
+            }
+        });
+
+        // تهيئة مبدئية
+        renderIndex(); 
+        if(myQuranDatabase.length > 0) loadSurah(0);
+    </script>
+</body>
+</html>
